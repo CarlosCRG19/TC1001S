@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 
+
 def epicFilter(img, filterAmount, filterSaturation, gamma):
     redImg = cv.addWeighted(img, abs(filterSaturation - 1),
                             np.full((img.shape[0], img.shape[1], 3), (255, 0, 0), np.uint8),
