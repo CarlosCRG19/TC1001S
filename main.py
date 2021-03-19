@@ -1,44 +1,10 @@
 import cv2
 import copy
-import numpy as np
-import tkinter as tk 
+import tkinter as tk
 from PIL import Image, ImageTk
-from tkinter import filedialog as fd 
+from tkinter import filedialog as fd
+from generalFilters import *
 
-# ------------------
-# -- FILTERS CODE --
-# ------------------
-
-# Basic Filters
-# -------------
-sharp = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-edges = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]])
-
-def basic_filters(filter):
-    global modifiable_image
-
-    if filter == 'blur':
-        modifiable_image = cv2.blur(modifiable_image,(5,5))
-    else:
-        modifiable_image  = cv2.filter2D(modifiable_image, -1, filter)
-
-    display_image(modifiable_image)
-
-
-# Color Filters
-# ------------   
-
-def color_filter(r_slider, g_slider, b_slider, saturation):
-    global modifiable_image
-
-    rgb = (r_slider, g_slider, b_slider)
-    beta = saturation / 100.0
-    alpha = 1 - beta
-
-    filter_frame = np.full((modifiable_image.shape), rgb, np.uint8)
-    filtered_image = cv2.addWeighted(modifiable_image, alpha, filter_frame, beta, 0)
-
-    display_image(filtered_image)
 
 # ---------------------
 # -- IMAGE FUNCTIONS --
@@ -164,7 +130,7 @@ saturation_slider.grid(column=5, row=4)
 
 # apply color filter 
 saturation = saturation_slider.get()
-rgb_button = tk.Button(root, command=lambda: color_filter(red_slider.get(), green_slider.get(), blue_slider.get(), saturation_slider.get()), text='Apply', font='Raleway')
+rgb_button = tk.Button(root, command=lambda: display_image(Filters.addColorFilter(modifiable_image , red_slider.get(), green_slider.get(), blue_slider.get(), saturation_slider.get())), text='Apply', font='Raleway')
 rgb_button.grid(column=5, row=7)
 
 # main menu
@@ -175,9 +141,9 @@ root.config(menu=menu)
 basic_filters_menu = tk.Menu(menu)
 menu.add_cascade(label='Basic Filters', menu=basic_filters_menu) 
 
-basic_filters_menu.add_command(label='Sharpen', command=lambda:basic_filters(sharp)) 
-basic_filters_menu.add_command(label='Blur', command=lambda:basic_filters('blur')) 
-basic_filters_menu.add_command(label='Show edges', command=lambda:basic_filters(edges))
+basic_filters_menu.add_command(label='Sharpen', command=lambda: display_image(Filters.addBasicFilter(modifiable_image, KERNEL_FILTERS.SHARP)))
+basic_filters_menu.add_command(label='Blur', command=lambda: display_image(Filters.addBasicFilter(modifiable_image,'blur')))
+basic_filters_menu.add_command(label='Show edges', command=lambda: display_image(Filters.addBasicFilter(modifiable_image, KERNEL_FILTERS.EDGES)))
 
 root.mainloop() 
 
