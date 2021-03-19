@@ -67,7 +67,7 @@ def upload_image():
     
     if filepath:
         instructions_text.set('Image Selected')
-        browse_text.set('Select Image')
+        browse_text.set('Select')
         print('image successfully loaded')
         image = cv2.imread(filepath.name)
         modifiable_image = copy.copy(image)
@@ -83,6 +83,7 @@ def reset_image():
     display_image(modifiable_image)
 
 def save_image():
+    instructions_text.set('Image Saved')
     canvas.image_tk._PhotoImage__photo.write('filtered_image.png', format='png')
 
 
@@ -117,19 +118,19 @@ instructions.grid(column=0, row=6, columnspan=3)
 
 # browse button and image loading
 browse_text = tk.StringVar()
-browse_image = tk.Button(root, width=11, height=1, command=upload_image, textvariable=browse_text, font='Raleway') # when the button is pressed, it opens the file explorer
-browse_text.set('Select Image')
+browse_image = tk.Button(root, width=9, height=1, command=upload_image, textvariable=browse_text, font='Raleway') # when the button is pressed, it opens the file explorer
+browse_text.set('Select')
 browse_image.grid(column=0, row=7)
 root.grid_rowconfigure(5, minsize=10)
 
 # reset image
 reset_text = tk.StringVar()
-reset_image = tk.Button(root, width=11, height=1, command=reset_image, textvariable=reset_text, font='Raleway') # when the button is pressed, it opens the file explorer
-reset_text.set('Reset Image')
+reset_image = tk.Button(root, width=9, height=1, command=reset_image, textvariable=reset_text, font='Raleway') # when the button is pressed, it opens the file explorer
+reset_text.set('Reset')
 reset_image.grid(column=1, row=7)
 
 # save image button
-save_button = tk.Button(root, width=11, height=1, command=save_image, text='Save Image', font='Raleway')
+save_button = tk.Button(root, width=9, height=1, command=save_image, text='Save', font='Raleway')
 save_button.grid(column=2, row=7)
 
 
@@ -164,7 +165,7 @@ saturation_slider.grid(column=5, row=4)
 
 # apply color filter 
 saturation = saturation_slider.get()
-rgb_button = tk.Button(root, command=lambda: color_filter(red_slider.get(), green_slider.get(), blue_slider.get(), saturation_slider.get()), text='Apply', font='Raleway')
+rgb_button = tk.Button(root, width=9, height=1, command=lambda: color_filter(red_slider.get(), green_slider.get(), blue_slider.get(), saturation_slider.get()), text='Apply', font='Raleway')
 rgb_button.grid(column=5, row=7)
 
 # main menu
@@ -180,4 +181,5 @@ basic_filters_menu.add_command(label='Blur', command=lambda:basic_filters('blur'
 basic_filters_menu.add_command(label='Show edges', command=lambda:basic_filters(edges))
 
 root.mainloop() 
+
 
