@@ -9,10 +9,11 @@ from tkinter import filedialog as fd
 # -- FILTERS CODE --
 # ------------------
 
+# Basic Filters
+# -------------
 sharp = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
 edges = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]])
 
-# Basic Filters
 def basic_filters(filter):
     global modifiable_image
 
@@ -25,12 +26,55 @@ def basic_filters(filter):
     # configure the canvas item to use this image
     canvas.itemconfigure(image_id, image=canvas.image_tk)
 
+
+# Color Filters
+# ------------   
+
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+
+def color_filter(filter):
+    global modifiable_image
+    filter_frame = np.full((modifiable_image.shape), filter, np.uint8)
+    print(filter_frame) 
+    filtered_image = cv2.add(modifiable_image, filter_frame)
+    filtered_image = cv2.addWeighted(filtered_image, 0.8, filter_frame, 0.2, 0)
+
+    canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(filtered_image , maxsize)))
+    canvas.itemconfigure(image_id, image=canvas.image_tk)
+
 # --------------
 # -- GUI CODE --
 # --------------
 
 # Interface and Image Uploading
 # -----------------------------
+
+def upload_image():
+    """
+    Function called by the Browse button. It opens the file explorer and asks you to select a png or jpeg file 
+    (actually, only this type of files are displayed on the file explorer). 
+    After that, it reads the file and stores it in the image variable.
+    """
+    global image 
+    global modifiable_image
+
+    browse_text.set("Loading...") 
+    filepath = fd.askopenfile(filetypes=(('image files', '.png'), ('image files', '.jpg'))) # filedialog function to open a file, it will only accept png or jpg images
+    if filepath:
+        instructions_text.set('Image Selected')
+        browse_text.set('Select Image')
+        print('image successfully loaded')
+        image = cv2.imread(filepath.name)
+        modifiable_image = copy.copy(image)
+
+        # create the image object, and save it so that it
+        # won't get deleted by the garbage collector
+        canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(modifiable_image, maxsize)))
+
+        # configure the canvas item to use this image
+        canvas.itemconfigure(image_id, image=canvas.image_tk)
 
 # interface
 root = tk.Tk()
@@ -76,7 +120,7 @@ exit_button.grid(column=2, row=3)
 menu = tk.Menu(root) 
 root.config(menu=menu) 
 
-# basic filter menu
+# basic filters menu
 basic_filters_menu = tk.Menu(menu)
 menu.add_cascade(label='Basic Filters', menu=basic_filters_menu) 
 
@@ -84,14 +128,12 @@ basic_filters_menu.add_command(label='Sharpen', command=lambda:basic_filters(sha
 basic_filters_menu.add_command(label='Blur', command=lambda:basic_filters('blur')) 
 basic_filters_menu.add_command(label='Show edges', command=lambda:basic_filters(edges))
 
-# color filter menu
-
-colorFilterMenu = tk.Menu(menu)
-menu.add_cascade(label='Color Filters', menu=colorFilterMenu) 
-colorFilterMenu.add_command(label='Red tint')
-colorFilterMenu.add_command(label='Green tint')
-colorFilterMenu.add_command(label='Blue tint')
-colorFilterMenu.add_command(label='Custom tint...')
+# color filters menu
+color_filters_menu = tk.Menu(menu)
+menu.add_cascade(label='Color Filters', menu=color_filters_menu) 
+color_filters_menu.add_command(label='Red tint', command=lambda:color_filter(red))
+color_filters_menu.add_command(label='Green tint', command=lambda:color_filter(green))
+color_filters_menu.add_command(label='Blue tint', command=lambda:color_filter(blue))
 
 root.mainloop() 
 
