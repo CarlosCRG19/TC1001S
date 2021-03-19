@@ -13,4 +13,4 @@ This is the repository for the project "Awesome Image Filters", made by José Na
 To open the main gui, simply run the file named "main.py". After that, select your image file, and apply the desired filters by either selecting them from the "Basic Filters" menu (Sharpen, Blur, Show Edges, Vignette, Epic Filter) or modifying the RGB and saturation sliders and clicking "Apply" to apply a tint with the desired color. The filters can be used on the same image one after the other, and when an undesired change is made, the image can be reset by clicking on the "Reset Image" button. Finally, you can save the image by clicking on "Save Image", which stores the modified image in the project directory.
 
 ### Dependencies
-This project uses OpenCV for the filters themselves, TkInter for the GUI and its elements, and PIL for the processing of image files.
+This project uses OpenCV and NumPy for the filters themselves, TkInter for the GUI and its elements, and PIL for the processing of image files.
