@@ -153,8 +153,8 @@ def startGUI():
     basic_filters_menu.add_command(label='Blur',
                                    command=lambda: display_image(
                                        applyFilter(partial(Filters.addBasicFilter, modifiable_image, 'blur'))))
-    basic_filters_menu.add_command(label='Show Edges', command=lambda: display_image(partial(
-        Filters.addBasicFilter, modifiable_image, KERNEL_FILTERS.EDGES)))
+    basic_filters_menu.add_command(label='Show Edges', command=lambda: display_image(applyFilter(partial(
+        Filters.addBasicFilter, modifiable_image, KERNEL_FILTERS.EDGES))))
     basic_filters_menu.add_command(label='Vignette',
                                    command=lambda: display_image(
                                        applyFilter(partial(Filters.addVignette, modifiable_image, 2))))
