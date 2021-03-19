@@ -22,34 +22,36 @@ def basic_filters(filter):
     else:
         modifiable_image  = cv2.filter2D(modifiable_image, -1, filter)
 
-    canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(modifiable_image , maxsize)))
-    # configure the canvas item to use this image
-    canvas.itemconfigure(image_id, image=canvas.image_tk)
+    display_image(modifiable_image)
 
 
 # Color Filters
 # ------------   
 
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-
-def color_filter(filter):
+def color_filter(r_slider, g_slider, b_slider, saturation):
     global modifiable_image
-    filter_frame = np.full((modifiable_image.shape), filter, np.uint8)
-    print(filter_frame) 
-    filtered_image = cv2.add(modifiable_image, filter_frame)
-    filtered_image = cv2.addWeighted(filtered_image, 0.8, filter_frame, 0.2, 0)
 
-    canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(filtered_image , maxsize)))
+    rgb = (r_slider, g_slider, b_slider)
+    beta = saturation / 100.0
+    alpha = 1 - beta
+
+    filter_frame = np.full((modifiable_image.shape), rgb, np.uint8)
+    filtered_image = cv2.addWeighted(modifiable_image, alpha, filter_frame, beta, 0)
+
+    display_image(filtered_image)
+
+# ---------------------
+# -- IMAGE FUNCTIONS --
+# ---------------------
+
+def display_image(displayable):
+    # create the image object, and save it so that it
+    # won't get deleted by the garbage collector
+    canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(displayable, maxsize)))
+
+    # configure the canvas item to use this image
     canvas.itemconfigure(image_id, image=canvas.image_tk)
 
-# --------------
-# -- GUI CODE --
-# --------------
-
-# Interface and Image Uploading
-# -----------------------------
 
 def upload_image():
     """
@@ -62,6 +64,7 @@ def upload_image():
 
     browse_text.set("Loading...") 
     filepath = fd.askopenfile(filetypes=(('image files', '.png'), ('image files', '.jpg'))) # filedialog function to open a file, it will only accept png or jpg images
+    
     if filepath:
         instructions_text.set('Image Selected')
         browse_text.set('Select Image')
@@ -69,21 +72,36 @@ def upload_image():
         image = cv2.imread(filepath.name)
         modifiable_image = copy.copy(image)
 
-        # create the image object, and save it so that it
-        # won't get deleted by the garbage collector
-        canvas.image_tk = ImageTk.PhotoImage(image=Image.fromarray(cv2.resize(modifiable_image, maxsize)))
+        display_image(modifiable_image)
+        
+def reset_image():
+    global modifiable_image
+    global image
 
-        # configure the canvas item to use this image
-        canvas.itemconfigure(image_id, image=canvas.image_tk)
+    instructions_text.set('Image Reseted')
+    modifiable_image = copy.copy(image)
+    display_image(modifiable_image)
+
+def save_image():
+    canvas.image_tk._PhotoImage__photo.write('filtered_image.png', format='png')
+
+
+# --------------
+# -- GUI CODE --
+# --------------
+
+# Interface and Image Uploading
+# -----------------------------
+
 
 # interface
 root = tk.Tk()
-root.geometry('400x400')
+root.geometry('575x365')
 root.title('Awesome Image Filters')
 
 # canvas creation
 canvas = tk.Canvas(root)
-canvas.grid(column=0, row=0, columnspan=3)
+canvas.grid(column=0, row=0, columnspan=3, rowspan=5)
 
 # image variables
 image = None
@@ -95,26 +113,59 @@ image_id = canvas.create_image(20, 20, anchor='nw')
 instructions_text = tk.StringVar()
 instructions = tk.Label(root, textvariable=instructions_text, font='Raleway')
 instructions_text.set('Select a PNG or a JPEG file')
-instructions.grid(column=0, row=2, columnspan=3)
+instructions.grid(column=0, row=6, columnspan=3)
 
 # browse button and image loading
 browse_text = tk.StringVar()
-browse_image = tk.Button(root, width=12, height=1, command=upload_image, textvariable=browse_text, font='Raleway') # when the button is pressed, it opens the file explorer
+browse_image = tk.Button(root, width=11, height=1, command=upload_image, textvariable=browse_text, font='Raleway') # when the button is pressed, it opens the file explorer
 browse_text.set('Select Image')
-browse_image.grid(column=0, row=3)
-root.grid_rowconfigure(1, minsize=10)
+browse_image.grid(column=0, row=7)
+root.grid_rowconfigure(5, minsize=10)
+
+# reset image
+reset_text = tk.StringVar()
+reset_image = tk.Button(root, width=11, height=1, command=reset_image, textvariable=reset_text, font='Raleway') # when the button is pressed, it opens the file explorer
+reset_text.set('Reset Image')
+reset_image.grid(column=1, row=7)
 
 # save image button
-save_button = tk.Button(root, width=10, height=1, text='Save Image', font='Raleway')
-save_button.grid(column=1, row=3)
-
-# exit button 
-exit_button = tk.Button(root, command=lambda: exit(), text='Exit', font='Raleway')
-exit_button.grid(column=2, row=3)
+save_button = tk.Button(root, width=11, height=1, command=save_image, text='Save Image', font='Raleway')
+save_button.grid(column=2, row=7)
 
 
 # Menu and filter application 
 # ---------------------------
+
+# RGB sliders
+rgb_label = tk.Label(root, text='RGB Filter', font='Raleway')
+rgb_label.grid(column=4, row=0, columnspan=2)
+
+# labels
+red_label = tk.Label(root, text='R')
+red_label.grid(column=4, row=1)
+green_label = tk.Label(root, text='G')
+green_label.grid(column=4, row=2)
+blue_label = tk.Label(root, text='B')
+blue_label.grid(column=4, row=3)
+
+# sliders
+red_slider = tk.Scale(root, from_=0, to=255, orient=tk.HORIZONTAL)
+red_slider.grid(column=5, row=1)
+green_slider = tk.Scale(root, from_=0, to=255, orient=tk.HORIZONTAL)
+green_slider.grid(column=5, row=2)
+blue_slider = tk.Scale(root, from_=0, to=255, orient=tk.HORIZONTAL)
+blue_slider.grid(column=5, row=3)
+
+# saturation slider
+saturation_label = tk.Label(root, text='SATURATION')
+saturation_label.grid(column=4, row=4)
+saturation_slider = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL)
+saturation_slider.grid(column=5, row=4)
+
+# apply color filter 
+saturation = saturation_slider.get()
+rgb_button = tk.Button(root, command=lambda: color_filter(red_slider.get(), green_slider.get(), blue_slider.get(), saturation_slider.get()), text='Apply', font='Raleway')
+rgb_button.grid(column=5, row=7)
 
 # main menu
 menu = tk.Menu(root) 
@@ -127,13 +178,6 @@ menu.add_cascade(label='Basic Filters', menu=basic_filters_menu)
 basic_filters_menu.add_command(label='Sharpen', command=lambda:basic_filters(sharp)) 
 basic_filters_menu.add_command(label='Blur', command=lambda:basic_filters('blur')) 
 basic_filters_menu.add_command(label='Show edges', command=lambda:basic_filters(edges))
-
-# color filters menu
-color_filters_menu = tk.Menu(menu)
-menu.add_cascade(label='Color Filters', menu=color_filters_menu) 
-color_filters_menu.add_command(label='Red tint', command=lambda:color_filter(red))
-color_filters_menu.add_command(label='Green tint', command=lambda:color_filter(green))
-color_filters_menu.add_command(label='Blue tint', command=lambda:color_filter(blue))
 
 root.mainloop() 
 
